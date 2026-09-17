@@ -1,0 +1,17 @@
+{
+  "name": "poultry-palace-sync",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebSocket multiplayer sync for Poultry Palace chicks",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "PORT=8090 node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
