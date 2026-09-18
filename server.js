@@ -175,7 +175,8 @@ wss.on('connection', (ws) => {
       if (typeof msg.name === 'string' && msg.name.trim()) {
         peer.name = msg.name.trim().slice(0, 32);
       }
-      if (typeof msg.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(msg.color)) {
+      // Palette color is assigned on connect. Only honor an explicit client pick (?color=).
+      if (msg.forceColor === true && typeof msg.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(msg.color)) {
         peer.color = msg.color;
       }
       const peers = [];
@@ -185,6 +186,7 @@ wss.on('connection', (ws) => {
       send(ws, {
         type: 'welcome',
         id: peer.id,
+        color: peer.color,
         peers,
         hostId: room.hostId,
         room: roomPublic(),
