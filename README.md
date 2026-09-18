@@ -5,6 +5,7 @@ WebSocket multiplayer sync for [Poultry Palace](https://poultry-palace-game.netl
 - **Chick presence** — join / state / peer / leave
 - **Shared room** (host authority = lowest peer id) — `dayT`, doors, hens
 - **Acts** (any client) — door toggle, skipDay
+- **Chat** (any client) — rate-limited relay (0.7s/peer, max 80 chars)
 
 ## Protocol
 
@@ -15,7 +16,8 @@ WebSocket multiplayer sync for [Poultry Palace](https://poultry-palace-game.netl
 -> { type:'room', dayT, doors, hens }     # host, ~6–10 Hz
 -> { type:'act', act:'door', key:'people'|'gate'|'partition', open:0|1 }
 -> { type:'act', act:'skipDay' }
-<- { type:'peer' | 'leave' | 'host' | 'room' | 'act' }
+-> { type:'chat', text }
+<- { type:'peer' | 'leave' | 'host' | 'room' | 'act' | 'chat' }
 ```
 
 Room shape: `{ dayT, doors:{ people, gate, partition, pop }, hens:[{ i,x,y,z,ry,alive }], hostId }`

@@ -5,6 +5,7 @@
  *
  * Room (host authority): dayT, doors, hens. Host = lowest connected peer id.
  * Acts (any client): door toggles, skipDay — server applies and broadcasts.
+ * Chat (any client): rate-limited chat relay (~0.7s/peer, max 80 chars).
  */
 const http = require('http');
 const fs = require('fs');
@@ -35,7 +36,7 @@ const room = {
 };
 
 /**
- * @typedef {{ id:number, name:string, color:string, x:number, y:number, z:number, ry:number, lastState:number, lastRoom:number }} Peer
+ * @typedef {{ id:number, name:string, color:string, x:number, y:number, z:number, ry:number, lastState:number, lastRoom:number, lastChat:number }} Peer
  */
 
 function peerPublic(p) {
@@ -158,6 +159,7 @@ wss.on('connection', (ws) => {
     x: 0, y: 0, z: 0, ry: 0,
     lastState: 0,
     lastRoom: 0,
+    lastChat: 0,
   };
   clients.set(ws, peer);
   electHost();
@@ -222,6 +224,24 @@ wss.on('connection', (ws) => {
       const hens = sanitizeHens(msg.hens);
       if (hens) room.hens = hens;
       broadcast({ type: 'room', ...roomPublic() }, ws);
+      return;
+    }
+
+
+    if (msg.type === 'chat') {
+      const now = Date.now();
+      if (now - peer.lastChat < 700) return;
+      let text = typeof msg.text === 'string' ? msg.text : '';
+      text = text.replace(/[\r\n\u2028\u2029]+/g, ' ').trim().slice(0, 80);
+      if (!text) return;
+      peer.lastChat = now;
+      broadcastAll({
+        type: 'chat',
+        id: peer.id,
+        name: peer.name,
+        color: peer.color,
+        text,
+      });
       return;
     }
 
